@@ -1,0 +1,20 @@
+{
+     "name": "8xprovn/imap_oauth2_v2",
+     "type": "package",
+     "require": {
+        "firebase/php-jwt": "^6.0"
+    },
+     "autoload": {
+         "psr-4": {
+             "ImapOauth2\\": "src/"
+         }
+     },
+     "extra": {
+        "laravel": {
+            "providers": [
+                "ImapOauth2\\ImapOauth2ServiceProvider"
+            ],
+            "aliases": {}
+        }
+    }
+ }
