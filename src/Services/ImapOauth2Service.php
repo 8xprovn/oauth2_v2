@@ -399,19 +399,8 @@ class ImapOauth2Service
      */
     public function saveToken($credentials)
     {
-    
-        //session()->put(self::ImapOauth2_SESSION.'access_token', $credentials['access_token']);
-        //Cookie::queue(self::ImapOauth2_SESSION.'access_token', $credentials['access_token'], 43200);
-        //Cookie::queue(self::ImapOauth2_SESSION.'refresh_token', $credentials['refresh_token'], 43200);
-        
         Cookie::queue(self::ImapOauth2_SESSION.'access_token', $credentials['access_token'], 3600, null, null, true, false);
         Cookie::queue(self::ImapOauth2_SESSION.'refresh_token', $credentials['access_token'], 864000, null, null, true, false);
-        
-        //Cookie::queue(cookie(self::ImapOauth2_SESSION.'access_token', $credentials['access_token'], 180, '/' , null , false, false));
-        //setcookie("TestCookie", $credentials['access_token'], 180, '/' , null , false, false);
-        //cookie('name', 'value', $minutes);
-        // session()->put(self::ImapOauth2_SESSION, $credentials);
-        // session()->save();
     }
 
     /**
