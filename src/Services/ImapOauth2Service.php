@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Cookie;
 use ImapOauth2\Auth\Guard\ImapOauth2WebGuard;
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\URL;
 
@@ -282,7 +283,7 @@ class ImapOauth2Service
         }
        
         //dd(session()->get(self::ImapOauth2_SESSION.'user_profile_'.$user['sub']));
-        if ($userProfile = session()->get(self::ImapOauth2_SESSION.'user_profile_'.$user['sub'])){
+        if ($userProfile = session()->get(self::ImapOauth2_SESSION.'user_profile_'.$user['contact_id'])){
             return $userProfile;
         }
         
@@ -291,16 +292,16 @@ class ImapOauth2Service
 
         if ($userProfile) {
             $userProfile['user_id'] = $user['sub'];
-            session()->put(self::ImapOauth2_SESSION.'user_profile_'.$user['sub'], $userProfile);
+            session()->put(self::ImapOauth2_SESSION.'user_profile_'.$user['contact_id'], $userProfile);
         }
      
         return $userProfile;
     }
     public function retrieveProfile($access_token, $user) {
 
-        $profile_url = config('imapoauth.api_gateway_url').'/crm/contacts/'.$user['sub'];
+        $profile_url = env('API_MICROSERVICE_URL').'/crm/contacts/'.$user['contact_id'];
 
-        $response = \Http::withToken($access_token)->get($profile_url);
+        $response = \Http::withToken(env('API_MICROSERVICE_TOKEN'))->get($profile_url);
        
         if ($response->successful()) {
 
@@ -320,9 +321,11 @@ class ImapOauth2Service
             return [];
         }
         $public_key = config('imapoauth.jwt_public_key');
+        //var_dump($token, $public_key);
         try {
             JWT::$leeway = 10;
-            return (array)JWT::decode($token, $public_key , array('RS256'));
+            //return (array)JWT::decode($token, $public_key , array('RS256'));
+            return (array) JWT::decode($token, new Key($public_key, 'RS256'));
         }catch (\Exception $e) {
              return [];
         }
