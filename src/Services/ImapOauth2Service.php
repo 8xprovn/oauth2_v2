@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Cookie;
 use ImapOauth2\Auth\Guard\ImapOauth2WebGuard;
 use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\URL;
 
@@ -317,14 +316,13 @@ class ImapOauth2Service
      */
     public function parseAccessToken($token)
     {
-    
         if (! is_string($token)) {
             return [];
         }
-        $public_key = config('imapoauth.jwt_public_key');  //env('ImapOauth2_JWT_PUBLIC_KEY');
+        $public_key = config('imapoauth.jwt_public_key');
         try {
             JWT::$leeway = 10;
-            return (array)JWT::decode($token, new Key($public_key, 'RS256'));
+            return (array)JWT::decode($token, $public_key , array('RS256'));
         }catch (\Exception $e) {
              return [];
         }
