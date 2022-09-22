@@ -110,21 +110,6 @@ class ImapOauth2Service
         if (is_null($this->callbackUrl)) {
             $this->callbackUrl = route('ImapOauth2.callback');
         }
-
-        if (is_null($this->googleCallbackUrl)) {
-            $this->googleCallbackUrl = route('ImapOauth2.google_callback');
-        }
-
-        if (is_null($this->facebookCallbackUrl)) {
-            $this->facebookCallbackUrl = route('ImapOauth2.facebook_callback');
-        }
-
-        if (is_null($this->redirectLogout)) {
-            $this->redirectLogout =  route('ImapOauth2.redirect_logout');
-        }
-
-       
-
         $this->httpClient = $client;
     }
 
@@ -174,27 +159,6 @@ class ImapOauth2Service
         return $this->getOauthUrl($this->callbackUrl);
 
     }
-
-    public function getOauthGoogleUrl()
-    {
-        return $this->getOauthUrl($this->googleCallbackUrl, 'oauth/authenticate', 'google');
-
-    }
-
-    public function getOauthFacebookUrl()
-    {
-        return $this->getOauthUrl($this->facebookCallbackUrl, 'oauth/authenticate', 'facebook');
-
-    }
-
-    public function getGoogleUrlCallback(){
-        return $this->googleCallbackUrl;
-    }
-
-    public function getFacebookUrlCallback(){
-        return $this->facebookCallbackUrl;
-    }
-
     
     /**
      * Get access token from Code
@@ -335,7 +299,7 @@ class ImapOauth2Service
     }
     public function retrieveProfile($access_token, $user) {
 
-        $profile_url = config('imapoauth.api_gateway_url').'/crm/me/contact';
+        $profile_url = config('imapoauth.api_gateway_url').'/crm/contacts/'.$user['sub'];
 
         $response = \Http::withToken($access_token)->get($profile_url);
        
@@ -373,22 +337,10 @@ class ImapOauth2Service
      */
     public function retrieveToken()
     {
-        // $a = array_filter([
-           
-        //     'access_token' => $_COOKIE[self::ImapOauth2_SESSION.'access_token'] ?? '',
-        //     'refresh_token' => $_COOKIE[self::ImapOauth2_SESSION.'refresh_token'] ?? '',
-        // ]);
-
         return array_filter([
-           
-            'access_token' => $_COOKIE[self::ImapOauth2_SESSION.'access_token'] ?? '',
-            'refresh_token' => $_COOKIE[self::ImapOauth2_SESSION.'refresh_token'] ?? '',
+            'refresh_token' => Cookie::get(self::ImapOauth2_SESSION.'refresh_token'),
+            'access_token' => Cookie::get(self::ImapOauth2_SESSION.'access_token'),
         ]);
-        // return array_filter([
-        //     'refresh_token' => Cookie::get(self::ImapOauth2_SESSION.'refresh_token'),
-        //     'access_token' => Cookie::get(self::ImapOauth2_SESSION.'access_token'),
-        //     //'access_token' => session()->get(self::ImapOauth2_SESSION.'access_token')
-        // ]);
         //return session()->get(self::ImapOauth2_SESSION);
     }
 

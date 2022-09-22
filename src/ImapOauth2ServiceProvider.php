@@ -90,8 +90,7 @@ class ImapOauth2ServiceProvider extends ServiceProvider
             'login' => env('ROUTE_PREFIX').'/login',
             'logout' => env('ROUTE_PREFIX').'/logout',
             'register' => env('ROUTE_PREFIX').'/register',
-            'callback' => env('ROUTE_PREFIX').'/callback',
-            'redirect_logout' => env('ROUTE_PREFIX').'/redirect-logout'
+            'callback' => env('ROUTE_PREFIX').'/callback'
         ];
         // Register Routes
         $router = $this->app->make('router');
@@ -103,11 +102,6 @@ class ImapOauth2ServiceProvider extends ServiceProvider
         if (! empty($options['logout'])) {
             $router->get($options['logout'], 'ImapOauth2\Controllers\AuthController@logout')->name('ImapOauth2.logout')->middleware('web');
         }
-
-        if (! empty($options['redirect_logout'])) {
-            $router->get($options['redirect_logout'], 'ImapOauth2\Controllers\AuthController@logoutRedirect')->name('ImapOauth2.redirect_logout')->middleware('web');
-        }
-
         if (! empty($options['register'])) {
             $router->get($options['register'], 'ImapOauth2\Controllers\AuthController@register')->name('ImapOauth2.register');
         }
@@ -117,37 +111,4 @@ class ImapOauth2ServiceProvider extends ServiceProvider
         }
     }
 
-    /**
-     * Register the authentication google routes for ImapOauth2.
-     *
-     * @return void
-     */
-    private function registerGoogleRoutes()
-    {
-        $googleUrl = env('ROUTE_PREFIX').'/oauth/google';
-        
-        $googleUrlCallBack = env('ROUTE_PREFIX').'/oauth/google/callback';
-        // Register Routes
-        $router = $this->app->make('router');
-        $router->get($googleUrl, 'ImapOauth2\Controllers\AuthController@googleLogin')->name('ImapOauth2.google_login');
-        $router->get($googleUrlCallBack, 'ImapOauth2\Controllers\AuthController@googleCallback')->name('ImapOauth2.google_callback');
-        
-    }
-
-     /**
-     * Register the authentication facebook routes for ImapOauth2.
-     *
-     * @return void
-     */
-    private function registerFacebookRoutes()
-    {
-
-        $facebookUrl = env('ROUTE_PREFIX').'/oauth/facebook';
-        $facebookUrlCallBack = env('ROUTE_PREFIX').'/oauth/facebook/callback';
-        // Register Routes
-        $router = $this->app->make('router');
-        $router->get($facebookUrl, 'ImapOauth2\Controllers\AuthController@facebookLogin')->name('ImapOauth2.facebook_login');
-        $router->get($facebookUrlCallBack, 'ImapOauth2\Controllers\AuthController@facebookCallback')->name('ImapOauth2.facebook_callback');
-        
-    }
 }
