@@ -64,8 +64,6 @@ class ImapOauth2ServiceProvider extends ServiceProvider
 
         // Routes
         $this->registerRoutes();
-        $this->registerGoogleRoutes();
-        $this->registerFacebookRoutes();
 
         // Middleware Group
         $this->app['router']->middlewareGroup('imap-web', [
