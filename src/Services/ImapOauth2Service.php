@@ -123,7 +123,7 @@ class ImapOauth2Service
     public function getLoginUrl($state = 'mystate')
     {
 
-        $url = $this->baseUrl.'/oauth/authenticate/';
+        $url = $this->baseUrl.'/login';
         $params = [
             'client_id' => $this->clientId,
             'grant_type'=> 'authorization_code',
@@ -281,33 +281,10 @@ class ImapOauth2Service
         if (!$user) {
             return [];
         }
-       
-        //dd(session()->get(self::ImapOauth2_SESSION.'user_profile_'.$user['sub']));
-        if ($userProfile = session()->get(self::ImapOauth2_SESSION.'user_profile_'.$user['contact_id'])){
-            return $userProfile;
-        }
-        
-        
-        $userProfile = $this->retrieveProfile($credentials['access_token'], $user);
-
-        if ($userProfile) {
-            $userProfile['user_id'] = $user['sub'];
-            session()->put(self::ImapOauth2_SESSION.'user_profile_'.$user['contact_id'], $userProfile);
-        }
+        return ['contact_id' => $user['sub'],'user_id' => $user['sub']];
+        //$userProfile = (new Crm)->getContactDetail($user['sub']);
      
-        return $userProfile;
-    }
-    public function retrieveProfile($access_token, $user) {
-
-        $profile_url = env('API_MICROSERVICE_URL').'/crm/contacts/'.$user['contact_id'];
-
-        $response = \Http::withToken(env('API_MICROSERVICE_TOKEN'))->get($profile_url);
-       
-        if ($response->successful()) {
-
-            return $response->json();
-        }
-        return false;
+        //return $userProfile;
     }
     /**
      * Get Access Token data

@@ -91,7 +91,7 @@ class AuthController extends Controller
 
         $redirectURL = Session::get($state);
 
-        if(!$redirectURL) return redirect(route('ImapOauth2.logout'));
+        //if(!$redirectURL) return redirect(route('ImapOauth2.logout'));
 
         if (!empty($code)) {
             $token = ImapOauth2Web::getAccessToken($code);
