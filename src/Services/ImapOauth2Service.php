@@ -123,7 +123,7 @@ class ImapOauth2Service
     public function getLoginUrl($state = 'mystate')
     {
 
-        $url = $this->baseUrl.'/login';
+        $url = $this->baseUrl.'/oauth/authorize';
         $params = [
             'client_id' => $this->clientId,
             'grant_type'=> 'authorization_code',
