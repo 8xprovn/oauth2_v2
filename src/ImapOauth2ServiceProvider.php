@@ -87,7 +87,7 @@ class ImapOauth2ServiceProvider extends ServiceProvider
         $options = [
             'login' => env('ROUTE_PREFIX').'/login',
             'logout' => env('ROUTE_PREFIX').'/logout',
-            'register' => env('ROUTE_PREFIX').'/register',
+            //'register' => env('ROUTE_PREFIX').'/register',
             'callback' => env('ROUTE_PREFIX').'/callback'
         ];
         // Register Routes
@@ -100,9 +100,9 @@ class ImapOauth2ServiceProvider extends ServiceProvider
         if (! empty($options['logout'])) {
             $router->get($options['logout'], 'ImapOauth2\Controllers\AuthController@logout')->name('ImapOauth2.logout')->middleware('web');
         }
-        if (! empty($options['register'])) {
-            $router->get($options['register'], 'ImapOauth2\Controllers\AuthController@register')->name('ImapOauth2.register');
-        }
+        // if (! empty($options['register'])) {
+        //     $router->get($options['register'], 'ImapOauth2\Controllers\AuthController@register')->name('ImapOauth2.register');
+        // }
 
         if (! empty($options['callback'])) {
             $router->get($options['callback'], 'ImapOauth2\Controllers\AuthController@callback')->name('ImapOauth2.callback')->middleware('web');

@@ -131,7 +131,6 @@ class ImapOauth2Service
             'redirect_uri' => $this->callbackUrl,
             'state' => $state
         ];
-
         return $this->buildUrl($url, $params);
     }
 
