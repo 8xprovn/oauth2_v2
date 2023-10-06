@@ -79,7 +79,7 @@ class AuthController extends Controller
             $error = $request->input('error_description');
             $error = ($error) ?: $request->input('error');
 
-            throw new ImapOauth2CallbackException($error);
+            return redirect('/');
         }
         
         $code = $request->input('code');
@@ -90,8 +90,9 @@ class AuthController extends Controller
         if(empty($state)) return redirect(route('ImapOauth2.logout'));
 
         $redirectURL = Session::get($state);
-
-        //if(!$redirectURL) return redirect(route('ImapOauth2.logout'));
+        if(!$redirectURL) {
+            $redirectURL = '/';
+        }
 
         if (!empty($code)) {
             $token = ImapOauth2Web::getAccessToken($code);
