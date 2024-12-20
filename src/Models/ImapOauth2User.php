@@ -150,4 +150,9 @@ class ImapOauth2User implements Authenticatable
     {
         throw new \BadMethodCallException('Unexpected method [getRememberTokenName] call');
     }
+
+    public function getAuthPasswordName()
+    {
+        throw new \BadMethodCallException('Unexpected method [getAuthPasswordName] call');
+    }
 }
