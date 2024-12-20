@@ -102,4 +102,9 @@ class ImapOauth2WebUserProvider implements UserProvider
     {
         throw new \BadMethodCallException('Unexpected method [validateCredentials] call');
     }
+
+    public function rehashPasswordIfRequired(Authenticatable $user, array $credentials, bool $force = false)
+    {
+        return false;
+    }
 }
