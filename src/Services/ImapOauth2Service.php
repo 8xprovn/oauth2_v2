@@ -299,13 +299,10 @@ class ImapOauth2Service
         $public_key = config('imapoauth.jwt_public_key');
         //var_dump($token, $public_key);
         try {
-            JWT::$leeway = 300;
+            JWT::$leeway = 100;
             //return (array)JWT::decode($token, $public_key , array('RS256'));
             return (array) JWT::decode($token, new Key($public_key, 'RS256'));
         }catch (\Exception $e) {
-            echo "time hiện tại". date("Y-m-d h:i:s");
-            dd($e->getMessage());
-            
              return [];
         }
     }
