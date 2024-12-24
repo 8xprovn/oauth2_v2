@@ -299,7 +299,7 @@ class ImapOauth2Service
         $public_key = config('imapoauth.jwt_public_key');
         //var_dump($token, $public_key);
         try {
-            JWT::$leeway = 100;
+            JWT::$leeway = 300;
             //return (array)JWT::decode($token, $public_key , array('RS256'));
             return (array) JWT::decode($token, new Key($public_key, 'RS256'));
         }catch (\Exception $e) {
