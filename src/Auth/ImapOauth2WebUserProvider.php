@@ -56,16 +56,19 @@ class ImapOauth2WebUserProvider implements UserProvider
      *
      * @param  mixed  $identifier
      * @return \Illuminate\Contracts\Auth\Authenticatable|null
-     */
-    public function retrieveById($identifier)
+     */ 
+
+     public function retrieveById($identifier)
     {
-        // /dd($identifier);
-        // return new GenericUser([
-            //     'id' => $credentials['contact_id'],
-            //     'phone' => $credentials['phone'],
-            // ]);
-        throw new \BadMethodCallException('Unexpected method [retrieveById] call');
+        if (!$identifier) {
+            return null;
+        }
+        $user = \Microservices::Crm('Contacts')->detail($identifier);
+        // $user = ($identifier == 1) ? ['is_superadmin' => true,'_id' => 1] : \Microservices::Hr('Employees')->detail($identifier);
+        $class = $this->model;
+        return new $class($user);
     }
+
 
     /**
      * Retrieve a user by their unique identifier and "remember me" token.

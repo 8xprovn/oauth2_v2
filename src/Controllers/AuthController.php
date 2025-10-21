@@ -20,11 +20,9 @@ class AuthController extends Controller
      */
     public function login()
     {
-       // $currentURL = URL::full();
         $preURL = URL::previous();
-        //$state =  bin2hex(openssl_random_pseudo_bytes(4));
         $state = Session::getId();
-        Session::put($state,$preURL);
+        Session::put($state, $preURL);
         $url = ImapOauth2Web::getLoginUrl($state);
         return redirect($url);
     }
@@ -36,7 +34,7 @@ class AuthController extends Controller
      */
     public function logout()
     {
-       
+
         ImapOauth2Web::forgetToken();
 
         $url = ImapOauth2Web::getLogoutUrl();
@@ -51,7 +49,7 @@ class AuthController extends Controller
      */
     public function logoutRedirect()
     {
-       return redirect('/');
+        return redirect('/');
     }
 
     /**
@@ -74,36 +72,24 @@ class AuthController extends Controller
      */
     public function callback(Request $request)
     {
-      
+
         if (! empty($request->input('error'))) {
             $error = $request->input('error_description');
             $error = ($error) ?: $request->input('error');
 
             return redirect('/');
         }
-        
+
         $code = $request->input('code');
-    
+
         $state = $request->input('state');
-
-
-        if(empty($state)) return redirect(route('ImapOauth2.logout'));
-
+        if (empty($state)) return redirect(route('ImapOauth2.logout'));
         $redirectURL = Session::get($state);
-        if(!$redirectURL) {
-            $redirectURL = '/';
-        }
-
+        if (!$redirectURL)  $redirectURL = '/';
         if (!empty($code)) {
             $token = ImapOauth2Web::getAccessToken($code);
-           //dd(ImapGuard::validate($token));
-            if (ImapGuard::validate($token)) {
-                //$url = env('ROUTE_PREFIX') ?? '/';
-                //if($redirectURL) {
-                    Session::forget($state);
-                    return redirect($redirectURL);
-                //}
-                //return redirect($url);
+            if (Auth::loginUsingToken($token)) {
+                return redirect($redirectURL);
             }
         }
 

@@ -6,6 +6,7 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Cookie;
 use ImapOauth2\Exceptions\ImapOauth2CallbackException;
 use ImapOauth2\Models\ImapOauth2User;
 use ImapOauth2\Facades\ImapOauth2Web;
@@ -17,6 +18,7 @@ class ImapOauth2WebGuard
     /**
      * @var null|Authenticatable|ImapOauth2User
      */
+    protected $cookePrefix= "imap_authen_user_";
     protected $user;
 
     /**
@@ -63,11 +65,11 @@ class ImapOauth2WebGuard
 
         $authen = $this->authenticate();
 
-        if($authen) {
+        if ($authen) {
             return $this->user;
         }
-        
-        return null; 
+
+        return null;
         //return $this->user ?: $this->authenticate();
     }
 
@@ -114,7 +116,7 @@ class ImapOauth2WebGuard
         $credentials['refresh_token'] = $credentials['refresh_token'] ?? '';
 
         ImapOauth2Web::saveToken($credentials);
-        
+
         return $this->authenticate($credentials);
     }
 
@@ -126,17 +128,17 @@ class ImapOauth2WebGuard
      */
     public function authenticate($credentials = array())
     {
-       
+
         //dd($credentials);
         // Get Credentials
         if (!$credentials) {
-            $credentials = ImapOauth2Web::retrieveToken();    
+            $credentials = ImapOauth2Web::retrieveToken();
         }
 
         if (empty($credentials['access_token'])) {
             return false;
         }
-       
+
         $user = ImapOauth2Web::getUserProfile($credentials);
 
         if (empty($user)) {
@@ -146,9 +148,33 @@ class ImapOauth2WebGuard
 
         // Provide User
         $user = $this->provider->retrieveByCredentials($user);
-        
+
         $this->setUser($user);
 
         return true;
+    }
+
+    public function login(Authenticatable $user, $remember = false)
+    {
+
+        $this->setUser($user);
+    }
+
+    public function loginUsingToken($credentials)
+    {
+        if (empty($credentials['access_token'])) {
+            return false;
+        }
+        $token = ImapOauth2Web::parseAccessToken($credentials['access_token']);
+        if (!$token || empty($token['sub'])) {
+            return false;
+        }
+        if (! is_null($user = $this->provider->retrieveById($token['sub']))) {
+            $this->login($user);
+            Cookie::queue($this->cookePrefix .'access_token', $credentials['access_token'], 1440, null, null, true, false);
+            Cookie::queue($this->cookePrefix .'refresh_token', $credentials['refresh_token'], 8640, null, null, true, false);
+            return $user;
+        }
+        return false;
     }
 }

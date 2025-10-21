@@ -16,14 +16,11 @@ class ImapOauth2Authenticated extends Authenticate
      * @return string
      */
     protected function redirectTo($request)
-    {
-        //$preURL = URL::previous();
+    { 
         $currentURL = URL::full();
-        //$state =  bin2hex(openssl_random_pseudo_bytes(4));
         $state = Session::getId();
-        Session::put($state,$currentURL);
-        $url = ImapOauth2Web::getLoginUrl($state);
+        Session::put($state, $currentURL);
+        $url = ImapOauth2Web::getLoginUrl($state); 
         return $url;
-        //return redirect($url);
     }
 }
