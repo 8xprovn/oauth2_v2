@@ -18,7 +18,7 @@ class ImapOauth2WebGuard
     /**
      * @var null|Authenticatable|ImapOauth2User
      */
-    protected $cookePrefix= "imap_authen_user_";
+    protected $cookePrefix = "imap_authen_user_";
     protected $user;
 
     /**
@@ -128,11 +128,12 @@ class ImapOauth2WebGuard
      */
     public function authenticate($credentials = array())
     {
-
-        //dd($credentials);
-        // Get Credentials
         if (!$credentials) {
             $credentials = ImapOauth2Web::retrieveToken();
+        }
+
+        if (empty($credentials) && request()->hasHeader($this->cookePrefix . 'access_token')) {
+            $credentials['access_token'] = request()->header($this->cookePrefix . 'access_token');
         }
 
         if (empty($credentials['access_token'])) {
@@ -171,8 +172,8 @@ class ImapOauth2WebGuard
         }
         if (! is_null($user = $this->provider->retrieveById($token['sub']))) {
             $this->login($user);
-            Cookie::queue($this->cookePrefix .'access_token', $credentials['access_token'], 1440, null, null, true, false);
-            Cookie::queue($this->cookePrefix .'refresh_token', $credentials['refresh_token'], 8640, null, null, true, false);
+            Cookie::queue($this->cookePrefix . 'access_token', $credentials['access_token'], 1440, null, null, true, false);
+            Cookie::queue($this->cookePrefix . 'refresh_token', $credentials['refresh_token'], 8640, null, null, true, false);
             return $user;
         }
         return false;
