@@ -1,14 +1,13 @@
 <?php
 
-namespace ImapOauth2\Middleware; 
+namespace ImapOauth2\Middleware;
+
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Http\Request;
-use ImapOauth2\Facades\ImapOauth2Web;
-use Symfony\Component\HttpFoundation\Cookie as SymfonyCookie;
-
+use ImapOauth2\Facades\ImapOauth2Web;  
 class ImapOauth2Authenticated extends Authenticate
 {
     protected string $cookiePrefix = 'imap_authen_user_';
@@ -36,10 +35,10 @@ class ImapOauth2Authenticated extends Authenticate
 
         // 2) Nếu có token → set cookie an toàn và redirect về URL sạch (không mang token)
         if (!empty($accessToken)) {
-            $this->queueSecureCookie($this->cookiePrefix . 'access_token', $accessToken, now()->addMinutes(60 * 24)); // 1 ngày
+            Cookie::queue($this->cookiePrefix . 'access_token', $accessToken, 1440, null, null, true, false);
 
             if (!empty($refreshToken)) {
-                $this->queueSecureCookie($this->cookiePrefix . 'refresh_token', $refreshToken, now()->addDays(6)); // ~6 ngày
+                Cookie::queue($this->cookiePrefix . 'refresh_token', $refreshToken, 8640, null, null, true, false);
             }
 
             // Xây URL sạch: loại bỏ các query chứa token
@@ -56,25 +55,7 @@ class ImapOauth2Authenticated extends Authenticate
         Session::put($state, $this->currentFullUrl($request)); // nhớ lại URL hiện tại (đầy đủ query hợp lệ)
         return ImapOauth2Web::getLoginUrl($state);
     }
-
-    /**
-     * Tạo cookie an toàn theo config session.
-     */
-    protected function queueSecureCookie(string $name, string $value, \DateTimeInterface $expiresAt): void
-    {
-        $path     = '/';
-        $domain   = config('session.domain');
-        $secure   = (bool) config('session.secure', request()->isSecure());
-        $httpOnly = true; // NGĂN JS đọc token
-        $sameSite = config('session.same_site', 'lax'); // 'lax'|'strict'|'none'
-
-        // Laravel Cookie::queue mặc định đã mã hoá (EncryptCookies trong web middleware)
-        Cookie::queue(
-            Cookie::make($name, $value, 0, $path, $domain, $secure, $httpOnly, false, $sameSite)
-                ->withExpires($expiresAt)
-        );
-    }
-
+ 
     /**
      * Lấy URL hiện tại (full) – dùng URL::full(), fallback nếu cần.
      */
