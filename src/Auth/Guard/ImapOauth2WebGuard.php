@@ -135,6 +135,9 @@ class ImapOauth2WebGuard
         if (empty($credentials) && request()->hasHeader($this->cookePrefix . 'access_token')) {
             $credentials['access_token'] = request()->header($this->cookePrefix . 'access_token');
         }
+        if (empty($credentials) && request()->hasHeader($this->cookePrefix . 'refresh_token')) {
+            $credentials['refresh_token'] = request()->header($this->cookePrefix . 'refresh_token');
+        }
 
         if (empty($credentials['access_token'])) {
             return false;
