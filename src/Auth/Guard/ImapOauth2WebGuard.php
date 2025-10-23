@@ -130,24 +130,7 @@ class ImapOauth2WebGuard
     {
         if (!$credentials) {
             $credentials = ImapOauth2Web::retrieveToken();
-        }
-
-        if (empty($credentials) && request()->hasHeader($this->cookePrefix . 'access_token')) {
-            $credentials['access_token'] = request()->header($this->cookePrefix . 'access_token');
-            Cookie::queue($this->cookePrefix . 'access_token', $credentials['access_token'], 1440, null, null, true, false);
-        }
-        if (empty($credentials) && request()->has($this->cookePrefix . 'access_token')) {
-            $credentials['access_token'] = request()->has($this->cookePrefix . 'access_token');
-            Cookie::queue($this->cookePrefix . 'access_token', $credentials['access_token'], 1440, null, null, true, false);
-        }
-        if (empty($credentials) && request()->hasHeader($this->cookePrefix . 'refresh_token')) {
-            $credentials['refresh_token'] = request()->header($this->cookePrefix . 'refresh_token');
-            Cookie::queue($this->cookePrefix . 'refresh_token', $credentials['refresh_token'], 8640, null, null, true, false);
-        }
-        if (empty($credentials) && request()->has($this->cookePrefix . 'refresh_token')) {
-            $credentials['refresh_token'] = request()->has($this->cookePrefix . 'refresh_token');
-            Cookie::queue($this->cookePrefix . 'refresh_token', $credentials['refresh_token'], 8640, null, null, true, false);
-        }
+        } 
 
         if (empty($credentials['access_token'])) {
             return false;
