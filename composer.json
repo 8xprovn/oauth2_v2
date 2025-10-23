@@ -1,6 +1,7 @@
 {
      "name": "8xprovn/imap_oauth2_v2",
      "type": "package",
+     "license": "proprietary",
      "require": {
         "firebase/php-jwt": "^6.0"
     },
