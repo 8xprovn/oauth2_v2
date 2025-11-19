@@ -7,9 +7,6 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use ImapOauth2\Exceptions\ImapOauth2CallbackException;
 use ImapOauth2\Facades\ImapOauth2Web;
-use ImapOauth2\Facades\ImapGuard;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\URL;
 
 class AuthController extends Controller
 {
@@ -20,10 +17,16 @@ class AuthController extends Controller
      */
     public function login()
     {
-        $preURL = URL::previous();
-        $state = Session::getId();
-        Session::put($state, $preURL);
-        $url = ImapOauth2Web::getLoginUrl($state);
+        $uri = $request->query('redirect_uri');
+        if (!$uri) {
+            $uri = env('APP_URL');
+        }
+        //////// RELOGIN ////////
+        if (Auth::loginUsingAccessToken()) {
+            return redirect($uri);
+        }
+        $state = base64_encode($uri);
+        $url = KeycloakWeb::getLoginUrl($state);
         return redirect($url);
     }
 
@@ -81,18 +84,17 @@ class AuthController extends Controller
         }
 
         $code = $request->input('code');
-
         $state = $request->input('state');
+
+        $state = base64_decode($state);
         if (empty($state)) return redirect(route('ImapOauth2.logout'));
-        $redirectURL = Session::get($state);
-        if (!$redirectURL)  $redirectURL = '/';
+    
         if (!empty($code)) {
             $token = ImapOauth2Web::getAccessToken($code);
             if (Auth::loginUsingToken($token)) {
-                return redirect($redirectURL);
+                return redirect($state);
             }
         }
-
         return redirect(route('ImapOauth2.logout'));
     }
 }

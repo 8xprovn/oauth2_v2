@@ -6,15 +6,10 @@ use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Cookie;
-use ImapOauth2\Auth\Guard\ImapOauth2WebGuard;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\URL;
 
 class ImapOauth2Service
 {
@@ -142,7 +137,9 @@ class ImapOauth2Service
     public function getLogoutUrl()
     {
         $url = $this->baseUrl.'/oauth/logout';
-
+        if (empty($this->redirectLogout)) {
+            $this->redirectLogout = url('/');
+        }
         return $this->buildUrl($url, ['redirect_uri' => $this->redirectLogout]);
     }
 
@@ -198,7 +195,7 @@ class ImapOauth2Service
 
         } catch (GuzzleException $e) {
        
-            $this->logException($e);
+            Log::error('[Userlogin Service: getAccessToken] ' . $e->getMessage());
         }
 
         return $token;
@@ -241,7 +238,7 @@ class ImapOauth2Service
                 $token = json_decode($token, true);
             }
         } catch (GuzzleException $e) {
-            $this->logException($e);
+            Log::error('[User Logout: refreshAccessToken] ' . $e->getMessage());
         }
 
         return $token;
@@ -427,40 +424,5 @@ class ImapOauth2Service
         }
         $this->saveToken($credentials);
         return $credentials;
-    }
-
-    /**
-     * Log a GuzzleException
-     *
-     * @param  GuzzleException $e
-     * @return void
-     */
-    protected function logException(GuzzleException $e)
-    {
-
-        if (empty($e->getResponse())) {
-            Log::error('[ImapOauth2 Service] ' . $e->getMessage());
-            return;
-        }
-
-        $error = [
-            'request' => $e->getRequest(),
-            'response' => $e->getResponse()->getBody()->getContents(),
-        ];
-
-        Log::error('[ImapOauth2 Service] ' . print_r($error, true));
-    }
-
-    /**
-     * Base64UrlDecode string
-     *
-     * @link https://www.php.net/manual/pt_BR/function.base64-encode.php#103849
-     *
-     * @param  string $data
-     * @return string
-     */
-    protected function base64UrlDecode($data)
-    {
-        return base64_decode(str_pad(strtr($data, '-_', '+/'), strlen($data) % 4, '=', STR_PAD_RIGHT));
     }
 }

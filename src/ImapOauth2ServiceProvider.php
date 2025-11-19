@@ -4,7 +4,6 @@ namespace ImapOauth2;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
-use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 //use Illuminate\Support\ServiceProvider;
@@ -67,7 +66,6 @@ class ImapOauth2ServiceProvider extends ServiceProvider
 
         // Middleware Group
         $this->app['router']->middlewareGroup('imap-web', [
-            StartSession::class,
             ImapOauth2Authenticated::class,
         ]);
 

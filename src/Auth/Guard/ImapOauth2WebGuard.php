@@ -20,7 +20,10 @@ class ImapOauth2WebGuard
      */
     protected $cookePrefix = "imap_authen_user_";
     protected $user;
-
+    protected $loggedOut = false;
+    protected $id;
+    protected $provider;
+    protected $request;
     /**
      * Constructor.
      *
@@ -39,7 +42,7 @@ class ImapOauth2WebGuard
      */
     public function check()
     {
-        return (bool) $this->user();
+        return (bool) $this->id();
     }
 
     /**
@@ -59,20 +62,28 @@ class ImapOauth2WebGuard
      */
     public function user()
     {
-        if (!is_null($this->user)) {
+        if ($this->loggedOut) {
+            return null;
+        }
+        if (! is_null($this->user)) {
             return $this->user;
         }
-
-        $authen = $this->authenticate();
-
-        if ($authen) {
-            return $this->user;
-        }
-
-        return null;
+        $userId = $this->id();
+        $this->user = $this->provider->retrieveById($userId);
+        return $this->user;
         //return $this->user ?: $this->authenticate();
     }
-
+    public function loginUsingAccessToken() {
+        $cookie = $this->request->cookie($this->cookePrefix . 'refresh_token');
+        if (!$cookie) {
+            return false;
+        }
+        $token = ImapOauth2Web::refreshAccessToken($cookie);
+        if (!$token) {
+            return false;
+        }
+        return $this->loginUsingToken($token);
+    }
     /**
      * Set the current user.
      *
@@ -91,8 +102,23 @@ class ImapOauth2WebGuard
      */
     public function id()
     {
-        $user = $this->user();
-        return $user->user_id ?? null;
+        if ($this->loggedOut) {
+            return;
+        }
+        if (! is_null($this->id)) {
+            return $this->id;
+        }
+        $token = $this->request->bearerToken() ?? $this->request->cookie($this->cookePrefix . 'access_token');
+        if (!$token) {
+            return null;
+        }
+        // decode token
+        $tokenDecode = ImapOauth2Web::parseAccessToken($token);
+        if (!$tokenDecode || empty($tokenDecode['sub'])) {
+            return null;
+        }
+        $this->id = $tokenDecode['sub'];
+        return $tokenDecode['sub'];
     }
 
     /**
@@ -126,30 +152,30 @@ class ImapOauth2WebGuard
      * @throws ImapOauth2CallbackException
      * @return boolean
      */
-    public function authenticate($credentials = array())
-    {
-        if (!$credentials) {
-            $credentials = ImapOauth2Web::retrieveToken();
-        } 
+    // public function authenticate($credentials = array())
+    // {
+    //     if (!$credentials) {
+    //         $credentials = ImapOauth2Web::retrieveToken();
+    //     } 
 
-        if (empty($credentials['access_token'])) {
-            return false;
-        }
+    //     if (empty($credentials['access_token'])) {
+    //         return false;
+    //     }
 
-        $user = ImapOauth2Web::getUserProfile($credentials);
+    //     $user = ImapOauth2Web::getUserProfile($credentials);
 
-        if (empty($user)) {
-            ImapOauth2Web::forgetToken();
-            return false;
-        }
+    //     if (empty($user)) {
+    //         ImapOauth2Web::forgetToken();
+    //         return false;
+    //     }
 
-        // Provide User
-        $user = $this->provider->retrieveByCredentials($user);
+    //     // Provide User
+    //     $user = $this->provider->retrieveByCredentials($user);
 
-        $this->setUser($user);
+    //     $this->setUser($user);
 
-        return true;
-    }
+    //     return true;
+    // }
 
     public function login(Authenticatable $user, $remember = false)
     {
@@ -173,5 +199,11 @@ class ImapOauth2WebGuard
             return $user;
         }
         return false;
+    }
+    public function logout() {
+        Cookie::queue(Cookie::forget($this->cookePrefix .'refresh_token'));
+        Cookie::queue(Cookie::forget($this->cookePrefix .'access_token'));
+        $this->loggedOut = true;
+        $this->user = null;
     }
 }
