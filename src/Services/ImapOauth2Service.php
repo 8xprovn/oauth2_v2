@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cookie;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
-use Illuminate\Support\Facades\Session;
 
 class ImapOauth2Service
 {
@@ -336,7 +335,6 @@ class ImapOauth2Service
      */
     public function forgetToken()
     {
-        \Session::invalidate();
         Cookie::queue(Cookie::forget(self::ImapOauth2_SESSION.'refresh_token'));
         Cookie::queue(Cookie::forget(self::ImapOauth2_SESSION.'access_token'));
     }
