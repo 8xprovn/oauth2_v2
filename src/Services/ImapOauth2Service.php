@@ -79,6 +79,8 @@ class ImapOauth2Service
     protected $redirectLogout;
 
     protected $userProfile;
+
+    protected $httpClient;
     /**
      * The Constructor
      * You can extend this service setting protected variables before call
