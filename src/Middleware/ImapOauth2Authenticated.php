@@ -14,7 +14,7 @@ class ImapOauth2Authenticated extends Authenticate
      */
     protected function redirectTo($request)
     {
-        $redirect_uri = base64_encode(url()->current());
+        $redirect_uri = base64_encode(url()->full());
         return ImapOauth2Web::getLoginUrl($redirect_uri);
     }
 }
